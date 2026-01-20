@@ -39,7 +39,7 @@ jobs:
         env:
           AVAILABILITY_DOMAINS: ${{ secrets.AVAILABILITY_DOMAINS }}
           DISPLAY_NAME: "Oracle-ARM-Server"
-          COMPARTMENT_ID: ${{ secrets.OCI_TENANCY_ID }} 
+          COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }} 
           SUBNET_ID: ${{ secrets.SUBNET_ID }}
           SSH_AUTHORIZED_KEYS: ${{ secrets.SSH_PUBLIC_KEY }}
           IMAGE_ID: ${{ secrets.IMAGE_ID }}
