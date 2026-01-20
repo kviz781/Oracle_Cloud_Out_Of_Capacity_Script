@@ -21,38 +21,40 @@ jobs:
         run: |
           pip install oci python-dotenv pyTelegramBotAPI
 
-      - name: Create OCI Config and Key
+      - name: Create OCI Config
         run: |
-          
+          # Создаем ключ
           echo "${{ secrets.OCI_KEY_CONTENT }}" > key.pem
           chmod 600 key.pem
+          
+          # Создаем конфиг
           echo "[DEFAULT]" > config
           echo "user=${{ secrets.OCI_USER_ID }}" >> config
           echo "fingerprint=${{ secrets.OCI_FINGERPRINT }}" >> config
           echo "tenancy=${{ secrets.OCI_TENANCY_ID }}" >> config
           echo "region=eu-amsterdam-1" >> config
           echo "key_file=$(pwd)/key.pem" >> config
+          
+          # Копируем конфиг ВНУТРЬ папки со скриптом
           cp config "Ampere 24 ram 4 cpu/config"
           cp key.pem "Ampere 24 ram 4 cpu/key.pem"
-          echo "--- Структура папок ---"
-          ls -R
 
       - name: Run Hunter Script
         env:
           AVAILABILITY_DOMAINS: "bJxe:eu-amsterdam-1-AD-1"
           DISPLAY_NAME: "Oracle-ARM-Server"
           COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
-          SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+          SUBNET_ID: ${{ secrets.SUBNET_ID }}
           SSH_AUTHORIZED_KEYS: ${{ secrets.SSH_PUBLIC_KEY }}
-          IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          IMAGE_ID: ${{ secrets.IMAGE_ID }}
           BOOT_VOLUME_SIZE_IN_GBS: 50
           BOT_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           UID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OCPUS: 4
           MEMORY_IN_GBS: 24
           MINIMUM_TIME_INTERVAL: 1
-          OCI_CLI_REGION: "eu-amsterdam-1"
-          ORACLE_REGION_NAME: "eu-amsterdam-1"
+          OCI_REGION: "eu-amsterdam-1"
         run: |
-          # Запускаем скрипт из корня, указывая путь к файлу
-          python "Ampere 24 ram 4 cpu/bot.py"
+          # ВАЖНО: Переходим в папку и запускаем оттуда
+          cd "Ampere 24 ram 4 cpu"
+          python bot.py
