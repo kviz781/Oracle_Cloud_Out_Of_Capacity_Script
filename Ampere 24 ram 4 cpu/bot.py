@@ -157,40 +157,33 @@ logging.info(f"Precheck passed! Ready to create instance: {ocpus} ocpus, {memory
 
 # ============================ INSTANCE LAUNCH ============================ #
 
-# Determine source details
-if imageId != "xxxx":
-    if boot_volume_size_in_gbs == "xxxx":
+# ============================ INSTANCE LAUNCH ============================ #
+
+# Определяем источник (Image или Boot Volume)
+if imageId and imageId != "xxxx":
+    logging.info(f"Using Image ID: {imageId}")
+    # Формируем детали образа
+    if boot_volume_size_in_gbs and boot_volume_size_in_gbs != "xxxx":
         source_details = oci.core.models.InstanceSourceViaImageDetails(
-            source_type="image", image_id=imageId
-        )
-    else:
-                source_details = oci.core.models.InstanceSourceViaImageDetails(
             source_type="image",
             image_id=imageId,
-            boot_volume_size_in_gbs=int(boot_volume_size_in_gbs) # Теперь любое значение станет числом
+            boot_volume_size_in_gbs=int(boot_volume_size_in_gbs)
         )
-
-elif boot_volume_id != "xxxx":
+    else:
+        source_details = oci.core.models.InstanceSourceViaImageDetails(
+            source_type="image",
+            image_id=imageId
+        )
+elif boot_volume_id and boot_volume_id != "xxxx":
+    logging.info(f"Using Boot Volume ID: {boot_volume_id}")
     source_details = oci.core.models.InstanceSourceViaBootVolumeDetails(
-        source_type="bootVolume", boot_volume_id=boot_volume_id
+        source_type="bootVolume", 
+        boot_volume_id=boot_volume_id
     )
 else:
-    logging.critical("No image or boot volume specified. **SCRIPT STOPPED**")
+    logging.critical("No valid imageId or bootVolumeId found. **SCRIPT STOPPED**")
     sys.exit()
 
-# Telegram status message
-if bot_token != "xxxx" and uid != "xxxx":
-    try:
-        msg = (
-            f"Cloud Account: {cloud_name}\n"
-            f"Email: {email}\n"
-            f"Number of Retry: 0\n"
-            f"Bot Status: Running\n"
-            f"Last Checked (UTC): {datetime.datetime.now(datetime.timezone.utc):%Y-%m-%d %H:%M:%S}"
-        )
-        msg_id = bot.send_message(uid, msg).id
-    except Exception:
-        msg_id = None
 
 # ============================ RETRY LOOP ============================ #
 
