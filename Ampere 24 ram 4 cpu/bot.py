@@ -24,9 +24,10 @@ boot_volume_id = os.getenv("BOOT_VOLUME_ID")
 bot_token = os.getenv("BOT_TOKEN")
 uid = os.getenv("UID")
 
-ocpus = int(os.getenv("OCPUS"))
-memory_in_gbs = int(os.getenv("MEMORY_IN_GBS"))
-minimum_time_interval = int(os.getenv("MINIMUM_TIME_INTERVAL"))
+ocpus = int(os.getenv("OCPUS") or 4)
+memory_in_gbs = int(os.getenv("MEMORY_IN_GBS") or 24)
+minimum_time_interval = int(os.getenv("MINIMUM_TIME_INTERVAL") or 1)
+region = os.getenv("OCI_REGION") # Добавили чтение региона
 
 # ============================ LOGGING SETUP ============================ #
 
@@ -42,23 +43,40 @@ logging.info("Script to spawn VM.Standard.A1.Flex instance")
 
 # ============================ INITIAL SETUP ============================ #
 
-if not bot_token == "xxxx" :
+if bot_token and bot_token != "xxxx":
     bot = telebot.TeleBot(bot_token)
+    
 message = f"Start spawning instance VM.Standard.A1.Flex - {ocpus} ocpus - {memory_in_gbs} GB"
 logging.info(message)
 
 logging.info("Loading OCI config")
-config = oci.config.from_file(file_location="./config")
 
-logging.info("Initialize OCI service clients")
+# Пытаемся найти конфиг в текущей папке или в корне
+config_path = "./config"
+if not os.path.exists(config_path):
+    config_path = "../config"
+
+config = oci.config.from_file(file_location=config_path)
+
+# ПРИНУДИТЕЛЬНО ПЕРЕЗАПИСЫВАЕМ РЕГИОН, ЕСЛИ ОН ЕСТЬ В ENV
+if region:
+    config['region'] = region
+
+logging.info(f"Initialize OCI service clients for region: {config['region']}")
 compute_client = oci.core.ComputeClient(config)
 identity_client = oci.identity.IdentityClient(config)
 vcn_client = oci.core.VirtualNetworkClient(config)
 volume_client = oci.core.BlockstorageClient(config)
 
-cloud_name = identity_client.get_tenancy(tenancy_id=compartmentId).data.name
-email = identity_client.list_users(compartment_id=compartmentId).data[0].email
-
+# Проверка авторизации
+try:
+    tenancy_data = identity_client.get_tenancy(tenancy_id=config['tenancy']).data
+    cloud_name = tenancy_data.name
+    email = identity_client.list_users(compartment_id=compartmentId).data[0].email
+    logging.info(f"Connected to Cloud: {cloud_name}")
+except Exception as e:
+    logging.error(f"Auth error: {e}")
+    sys.exit(1)
 # ============================ STORAGE CHECK ============================ #
 
 logging.info("Checking available storage in account")
