@@ -43,6 +43,8 @@ logging.info("Script to spawn VM.Standard.A1.Flex instance")
 
 # ============================ INITIAL SETUP ============================ #
 
+# ============================ INITIAL SETUP ============================ #
+
 if bot_token and bot_token != "xxxx":
     bot = telebot.TeleBot(bot_token)
     
@@ -50,32 +52,30 @@ message = f"Start spawning instance VM.Standard.A1.Flex - {ocpus} ocpus - {memor
 logging.info(message)
 
 logging.info("Loading OCI config")
+# Загружаем конфиг, но сразу форсируем регион из ENV
+config = oci.config.from_file(file_location="./config")
 
-# Пытаемся найти конфиг в текущей папке или в корне
-config_path = "./config"
-if not os.path.exists(config_path):
-    config_path = "../config"
+# Берем регион из GitHub Action (env) или оставляем из файла
+env_region = os.getenv("OCI_REGION")
+if env_region:
+    config['region'] = env_region
+    logging.info(f"Region forced from environment: {config['region']}")
 
-config = oci.config.from_file(file_location=config_path)
+logging.info("Initialize OCI service clients")
+# Явно передаем регион в каждый клиент на случай, если конфиг его теряет
+compute_client = oci.core.ComputeClient(config, region=config['region'])
+identity_client = oci.identity.IdentityClient(config, region=config['region'])
+vcn_client = oci.core.VirtualNetworkClient(config, region=config['region'])
+volume_client = oci.core.BlockstorageClient(config, region=config['region'])
 
-# ПРИНУДИТЕЛЬНО ПЕРЕЗАПИСЫВАЕМ РЕГИОН, ЕСЛИ ОН ЕСТЬ В ENV
-if region:
-    config['region'] = region
-
-logging.info(f"Initialize OCI service clients for region: {config['region']}")
-compute_client = oci.core.ComputeClient(config)
-identity_client = oci.identity.IdentityClient(config)
-vcn_client = oci.core.VirtualNetworkClient(config)
-volume_client = oci.core.BlockstorageClient(config)
-
-# Проверка авторизации
+# Проверка связи
 try:
-    tenancy_data = identity_client.get_tenancy(tenancy_id=config['tenancy']).data
-    cloud_name = tenancy_data.name
+    tenancy = identity_client.get_tenancy(tenancy_id=config['tenancy']).data
+    cloud_name = tenancy.name
     email = identity_client.list_users(compartment_id=compartmentId).data[0].email
-    logging.info(f"Connected to Cloud: {cloud_name}")
+    logging.info(f"Successfully connected to {cloud_name} ({email})")
 except Exception as e:
-    logging.error(f"Auth error: {e}")
+    logging.error(f"Failed to connect to Oracle Cloud: {e}")
     sys.exit(1)
 # ============================ STORAGE CHECK ============================ #
 
