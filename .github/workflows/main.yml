@@ -37,16 +37,16 @@ jobs:
 
       - name: Run Hunter Script
         env:
-          AVAILABILITY_DOMAINS: ${{ secrets.AVAILABILITY_DOMAINS }}
+          AVAILABILITY_DOMAINS: "oInM:EU-AMSTERDAM-1-AD-1" 
           DISPLAY_NAME: "Oracle-ARM-Server"
-          COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }} 
-          SUBNET_ID: ${{ secrets.SUBNET_ID }}
+          COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
+          SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
           SSH_AUTHORIZED_KEYS: ${{ secrets.SSH_PUBLIC_KEY }}
-          IMAGE_ID: ${{ secrets.IMAGE_ID }}
-          BOOT_VOLUME_SIZE_IN_GBS: 50
+          IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          BOOT_VOLUME_SIZE_IN_GBS: "50"
           BOT_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           UID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          OCPUS: 4
-          MEMORY_IN_GBS: 24
-          MINIMUM_TIME_INTERVAL: 1
+          OCPUS: "4"
+          MEMORY_IN_GBS: "24"
+          MINIMUM_TIME_INTERVAL: "1"
         run: python "Ampere 24 ram 4 cpu/bot.py"
