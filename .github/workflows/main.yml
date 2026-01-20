@@ -1,9 +1,9 @@
 name: Oracle Cloud Hunter
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   schedule:
-    - cron: '*/15 * * * *' 
+    - cron: '*/30 * * * *' 
 
 jobs:
   hunt:
@@ -19,18 +19,34 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r "Ampere 24 ram 4 cpu/requirements.txt"
-          pip install oci
+          pip install oci python-dotenv pyTelegramBotAPI
+
+      - name: Create OCI Config and Key
+        run: |
+       
+          echo "${{ secrets.OCI_KEY_CONTENT }}" > key.pem
+          chmod 600 key.pem
+          
+        
+          echo "[DEFAULT]" > config
+          echo "user=${{ secrets.OCI_USER_ID }}" >> config
+          echo "fingerprint=${{ secrets.OCI_FINGERPRINT }}" >> config
+          echo "tenancy=${{ secrets.OCI_TENANCY_ID }}" >> config
+          echo "region=${{ secrets.OCI_REGION }}" >> config
+          echo "key_file=$(pwd)/key.pem" >> config
 
       - name: Run Hunter Script
         env:
-        
-          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
-          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_KEY_CONTENT: ${{ secrets.OCI_KEY_CONTENT }}
-
-          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          AVAILABILITY_DOMAINS: ${{ secrets.AVAILABILITY_DOMAINS }}
+          DISPLAY_NAME: "Oracle-ARM-Server"
+          COMPARTMENT_ID: ${{ secrets.OCI_TENANCY_ID }} 
+          SUBNET_ID: ${{ secrets.SUBNET_ID }}
+          SSH_AUTHORIZED_KEYS: ${{ secrets.SSH_PUBLIC_KEY }}
+          IMAGE_ID: ${{ secrets.IMAGE_ID }}
+          BOOT_VOLUME_SIZE_IN_GBS: 50
+          BOT_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          UID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          OCPUS: 4
+          MEMORY_IN_GBS: 24
+          MINIMUM_TIME_INTERVAL: 1
         run: python "Ampere 24 ram 4 cpu/bot.py"
