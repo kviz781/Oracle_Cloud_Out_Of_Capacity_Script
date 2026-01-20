@@ -37,7 +37,7 @@ jobs:
 
       - name: Run Hunter Script
         env:
-          AVAILABILITY_DOMAINS: "oInM:EU-AMSTERDAM-1-AD-1" 
+          AVAILABILITY_DOMAINS: "bJxe:eu-amsterdam-1-AD-1" 
           DISPLAY_NAME: "Oracle-ARM-Server"
           COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
           SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
