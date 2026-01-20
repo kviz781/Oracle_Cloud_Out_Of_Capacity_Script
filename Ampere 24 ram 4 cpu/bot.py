@@ -164,11 +164,12 @@ if imageId != "xxxx":
             source_type="image", image_id=imageId
         )
     else:
-        source_details = oci.core.models.InstanceSourceViaImageDetails(
+                source_details = oci.core.models.InstanceSourceViaImageDetails(
             source_type="image",
             image_id=imageId,
-            boot_volume_size_in_gbs=boot_volume_size_in_gbs
+            boot_volume_size_in_gbs=int(boot_volume_size_in_gbs) # Теперь любое значение станет числом
         )
+
 elif boot_volume_id != "xxxx":
     source_details = oci.core.models.InstanceSourceViaBootVolumeDetails(
         source_type="bootVolume", boot_volume_id=boot_volume_id
