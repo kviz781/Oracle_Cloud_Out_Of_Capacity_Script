@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '*/30 * * * *' 
-
+    
+concurrency:
+  group: oracle-hunter
+  cancel-in-progress: true
+  
 jobs:
   hunt:
     runs-on: ubuntu-latest
