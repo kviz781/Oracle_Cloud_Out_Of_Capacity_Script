@@ -52,9 +52,8 @@ jobs:
           UID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OCPUS: 4
           MEMORY_IN_GBS: 24
-          MINIMUM_TIME_INTERVAL: 1
+          MINIMUM_TIME_INTERVAL: 30
           OCI_REGION: "eu-amsterdam-1"
         run: |
-          # ВАЖНО: Переходим в папку и запускаем оттуда
           cd "Ampere 24 ram 4 cpu"
           python bot.py
