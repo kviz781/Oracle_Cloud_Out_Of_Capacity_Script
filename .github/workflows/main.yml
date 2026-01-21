@@ -52,7 +52,7 @@ jobs:
           UID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OCPUS: 4
           MEMORY_IN_GBS: 24
-          MINIMUM_TIME_INTERVAL: 30
+          MINIMUM_TIME_INTERVAL: 60
           OCI_REGION: "eu-amsterdam-1"
         run: |
           cd "Ampere 24 ram 4 cpu"
