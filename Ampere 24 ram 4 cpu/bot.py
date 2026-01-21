@@ -9,6 +9,8 @@ import os
 
 # ============================ CONFIGURATION ============================ #
 
+msg_id = None
+
 load_dotenv()
 
 availabilityDomains = os.getenv("AVAILABILITY_DOMAINS").split(",")
@@ -40,8 +42,6 @@ logging.basicConfig(
 
 logging.info("#####################################################")
 logging.info("Script to spawn VM.Standard.A1.Flex instance")
-
-# ============================ INITIAL SETUP ============================ #
 
 # ============================ INITIAL SETUP ============================ #
 
@@ -154,8 +154,6 @@ if displayName in instance_names:
     sys.exit()
 
 logging.info(f"Precheck passed! Ready to create instance: {ocpus} ocpus, {memory_in_gbs} GB")
-
-# ============================ INSTANCE LAUNCH ============================ #
 
 # ============================ INSTANCE LAUNCH ============================ #
 
